@@ -1,28 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './ChatPage.css';
 
-const ChatPage = ({ sendIcon }) => {
-  const [messages, setMessages] = useState([
-    { id: 1, sender: 'Alice', text: 'Привет! Как дела?', date: '10/05/2025', time: '10:00 AM', isCurrentUser: false },
-    { id: 2, sender: 'Вы', text: 'Отлично, спасибо! А у тебя?', date: '10/05/2025', time: '10:01 AM', isCurrentUser: true },
-    { id: 3, sender: 'Bob', text: 'Пошли обсудим проект?', date: '10/05/2025', time: '10:02 AM', isCurrentUser: false }
-  ]);
+const ChatPage = ({ sendIcon, currentUser }) => {
+  const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
 
-  const handleSendMessage = (e) => {
+  useEffect(() => {
+    if (!currentUser) return;
+    async function fetchMessages() {
+      try {
+        const response = await fetch('http://localhost:5000/api/messages');
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Fetched messages:', data);
+          const formattedMessages = data.map(m => ({
+            id: m.message_id,
+            sender: m.sender,
+            text: m.content,
+            date: new Date(m.created_at).toLocaleDateString('en-GB'),
+            time: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            isCurrentUser: currentUser && m.user_id === currentUser.user_id
+          }));
+          setMessages(formattedMessages);
+        } else {
+          console.error('Error fetching messages, status:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    }
+    fetchMessages();
+  }, [currentUser]);
+  
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if(newMessage.trim() === '') return;
-    const now = new Date();
-    const message = {
-      id: messages.length + 1,
-      sender: 'Вы',
-      text: newMessage,
-      date: now.toLocaleDateString('en-GB'),
-      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isCurrentUser: true
-    };
-    setMessages([...messages, message]);
-    setNewMessage('');
+    if (newMessage.trim() === '') return;
+    try {
+      const response = await fetch('http://localhost:5000/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: currentUser.user_id, content: newMessage })
+      });
+      if (!response.ok) throw new Error('Error sending message');
+      const insertedMessage = await response.json();
+      console.log('Inserted message:', insertedMessage);
+      const messageObj = {
+        id: insertedMessage.message_id,
+        sender: currentUser.login,
+        text: insertedMessage.content,
+        date: new Date(insertedMessage.created_at).toLocaleDateString('en-GB'),
+        time: new Date(insertedMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isCurrentUser: true
+      };
+      setMessages(prev => [...prev, messageObj]);
+      setNewMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 
   return (
@@ -38,7 +72,7 @@ const ChatPage = ({ sendIcon }) => {
             )}
             <div className={`chat-message ${msg.isCurrentUser ? 'current-user' : 'other-user'}`}>
               <div className="bubble">
-                {!msg.isCurrentUser && <span className="sender">{msg.sender}</span> }
+                {!msg.isCurrentUser && <span className="sender">{msg.sender}</span>}
                 <div className="message-text">{msg.text}</div>
                 <div className="message-info">
                   <span className="time">{msg.time}</span>
@@ -50,12 +84,7 @@ const ChatPage = ({ sendIcon }) => {
       </div>
       <footer className="chat-footer">
         <form onSubmit={handleSendMessage}>
-          <input
-            type="text"
-            placeholder="Введите сообщение..."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-          />
+          <input type="text" placeholder="Введите сообщение..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
           <button type="submit" className="send-button">
             {sendIcon ? sendIcon : (
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">

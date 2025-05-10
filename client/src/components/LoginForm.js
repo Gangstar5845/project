@@ -24,7 +24,7 @@ const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
       const data = await response.json();
       if (response.ok) {
         setSuccess(`Пользователь ${data.login} успешно вошёл!`);
-        onLoginSuccess();
+        onLoginSuccess(data); 
       } else {
         setError(data.error || 'Ошибка авторизации.');
       }

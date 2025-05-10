@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './RegistrationForm.css';
-const LoginForm = ({ onSwitchToRegister }) => {
+
+const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -10,12 +11,10 @@ const LoginForm = ({ onSwitchToRegister }) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-
     if (!login || !password) {
       setError('Пожалуйста, заполните все поля.');
       return;
     }
-
     try {
       const response = await fetch('http://localhost:5000/api/login', {
         method: 'POST',
@@ -25,8 +24,7 @@ const LoginForm = ({ onSwitchToRegister }) => {
       const data = await response.json();
       if (response.ok) {
         setSuccess(`Пользователь ${data.login} успешно вошёл!`);
-        setLogin('');
-        setPassword('');
+        onLoginSuccess();
       } else {
         setError(data.error || 'Ошибка авторизации.');
       }
@@ -65,10 +63,7 @@ const LoginForm = ({ onSwitchToRegister }) => {
         </div>
         <button type="submit" className="auth-button">Войти</button>
       </form>
-      <button 
-        onClick={onSwitchToRegister}
-        className="switch-button"
-      >
+      <button onClick={onSwitchToRegister} className="switch-button">
         Нет аккаунта? Зарегистрироваться
       </button>
     </div>

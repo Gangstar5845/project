@@ -16,6 +16,7 @@ const pool = new Pool({
   password: '6974I21830',
   port: 5432
 });
+
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
@@ -64,7 +65,6 @@ app.post('/api/login', async (req, res) => {
     res.status(500).json({ error: 'Ошибка сервера.' });
   }
 });
-
 app.get('/api/messages', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -84,6 +84,7 @@ app.get('/api/messages', async (req, res) => {
     res.status(500).json({ error: 'Ошибка сервера.' });
   }
 });
+
 app.post('/api/messages', async (req, res) => {
   const { user_id, content } = req.body;
   if (!user_id || !content) {
@@ -91,7 +92,9 @@ app.post('/api/messages', async (req, res) => {
   }
   try {
     const result = await pool.query(
-      'INSERT INTO messages (user_id, content, created_at) VALUES ($1, $2, NOW()) RETURNING message_id, user_id, content, created_at',
+      `INSERT INTO messages (user_id, content, created_at, updated_at)
+       VALUES ($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+       RETURNING message_id, user_id, content, created_at, updated_at`,
       [user_id, content]
     );
     res.status(201).json(result.rows[0]);

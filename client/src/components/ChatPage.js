@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './ChatPage.css';
 
 const ChatPage = ({ sendIcon, currentUser }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -12,14 +13,13 @@ const ChatPage = ({ sendIcon, currentUser }) => {
         const response = await fetch('http://localhost:5000/api/messages');
         if (response.ok) {
           const data = await response.json();
-          console.log('Fetched messages:', data);
           const formattedMessages = data.map(m => ({
             id: m.message_id,
             sender: m.sender,
             text: m.content,
             date: new Date(m.created_at).toLocaleDateString('en-GB'),
             time: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            isCurrentUser: currentUser && m.user_id === currentUser.user_id
+            isCurrentUser: m.user_id === currentUser.user_id
           }));
           setMessages(formattedMessages);
         } else {
@@ -31,7 +31,11 @@ const ChatPage = ({ sendIcon, currentUser }) => {
     }
     fetchMessages();
   }, [currentUser]);
-  
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
+  }, [messages]);
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (newMessage.trim() === '') return;
@@ -43,7 +47,6 @@ const ChatPage = ({ sendIcon, currentUser }) => {
       });
       if (!response.ok) throw new Error('Error sending message');
       const insertedMessage = await response.json();
-      console.log('Inserted message:', insertedMessage);
       const messageObj = {
         id: insertedMessage.message_id,
         sender: currentUser.login,
@@ -81,10 +84,16 @@ const ChatPage = ({ sendIcon, currentUser }) => {
             </div>
           </React.Fragment>
         ))}
+        <div ref={messagesEndRef}></div>
       </div>
       <footer className="chat-footer">
         <form onSubmit={handleSendMessage}>
-          <input type="text" placeholder="Введите сообщение..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
+          <input 
+            type="text" 
+            placeholder="Введите сообщение..." 
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+          />
           <button type="submit" className="send-button">
             {sendIcon ? sendIcon : (
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">

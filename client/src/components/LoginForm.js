@@ -24,7 +24,7 @@ const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
       const data = await response.json();
       if (response.ok) {
         setSuccess(`Пользователь ${data.login} успешно вошёл!`);
-        onLoginSuccess(data); 
+        onLoginSuccess(data);
       } else {
         setError(data.error || 'Ошибка авторизации.');
       }
@@ -34,38 +34,40 @@ const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
   };
 
   return (
-    <div className="auth-container">
-      <h2>Вход</h2>
-      {error && <div className="error">{error}</div>}
-      {success && <div className="success">{success}</div>}
-      <form onSubmit={handleLogin}>
-        <div className="form-group">
-          <label htmlFor="login">Логин</label>
-          <input
-            type="text"
-            id="login"
-            placeholder="Введите логин"
-            value={login}
-            onChange={(e) => setLogin(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Пароль</label>
-          <input
-            type="password"
-            id="password"
-            placeholder="Введите пароль"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit" className="auth-button">Войти</button>
-      </form>
-      <button onClick={onSwitchToRegister} className="switch-button">
-        Нет аккаунта? Зарегистрироваться
-      </button>
+    <div className="auth-page">
+      <header className="chat-header">
+        <h2>Чат</h2>
+      </header>
+      <div className="auth-container">
+        {error && <div className="error">{error}</div>}
+        {success && <div className="success">{success}</div>}
+        <form onSubmit={handleLogin}>
+          <div className="form-group">
+            <label htmlFor="login">Логин</label>
+            <input
+              type="text"
+              id="login"
+              value={login}
+              onChange={(e) => setLogin(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password">Пароль</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="auth-button">Войти</button>
+        </form>
+        <button onClick={onSwitchToRegister} className="switch-button">
+          Нет аккаунта? Зарегистрироваться
+        </button>
+      </div>
     </div>
   );
 };

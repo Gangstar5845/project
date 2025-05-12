@@ -153,7 +153,7 @@ const ChatPage = ({ sendIcon, currentUser }) => {
   return (
     <div className="chat-page" onContextMenu={(e) => e.preventDefault()}>
       <header className="chat-header">
-        <h2>Чат</h2>
+        <h2>Чат релиз</h2>
       </header>
       <div className="chat-messages">
         {messages.map((msg, index) => (

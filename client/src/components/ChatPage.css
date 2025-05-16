@@ -59,6 +59,21 @@ body {
   padding: 0 5px;
   clear: both;
 }
+.logout-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 12px;
+  font-size: 14px;
+  background-color: #1976D2; 
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+
 
 .chat-message {
   margin-bottom: 15px;

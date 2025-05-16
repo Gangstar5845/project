@@ -11,17 +11,21 @@ const RegistrationForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    
     if (!login || !password) {
       setError('Пожалуйста, заполните все поля.');
       return;
     }
+    
     try {
       const response = await fetch('http://localhost:5000/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ login, password })
       });
+      
       const data = await response.json();
+      
       if (response.ok) {
         setSuccess(`Пользователь ${data.login} успешно зарегистрирован!`);
         onRegisterSuccess(data);
